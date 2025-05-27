@@ -1,4 +1,4 @@
-name: 构建Android APK
+name: 构建Android APK并发布
 
 on:
   push:
@@ -23,19 +23,36 @@ jobs:
       - name: 授予执行权限
         run: chmod +x gradlew
 
-      - name: 构建APK
-        run: ./gradlew assembleLeanbackArm64_v8aRelease
+      - name: 获取版本号
+        id: version
+        run: |
+          VERSION_NAME=$(grep "versionName" app/build.gradle | sed 's/.*versionName "\(.*\)".*/\1/')
+          echo "version=$VERSION_NAME" >> $GITHUB_OUTPUT
+          echo "版本号: $VERSION_NAME"
 
-      - name: 列出构建目录
-        run: find app -name "*.apk" -type f
+      - name: 构建所有APK
+        run: ./gradlew assembleRelease
 
       - name: 列出所有APK文件
         run: find . -name "*.apk" -type f
 
-      - name: 上传APK
-        uses: actions/upload-artifact@v4
+      - name: 创建Release Tag
+        id: create_tag
+        run: |
+          TAG_NAME="v${{ steps.version.outputs.version }}"
+          echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
+          git tag $TAG_NAME
+          git push origin $TAG_NAME || echo "标签可能已存在，继续执行"
+
+      - name: 创建GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: app-leanback-arm64_v8a-release
-          path: |
-            app/build/outputs/apk/**/*.apk
-            */build/outputs/apk/**/*.apk 
+          tag_name: ${{ steps.create_tag.outputs.tag }}
+          name: "版本 ${{ steps.version.outputs.version }}"
+          draft: false
+          prerelease: false
+          files: |
+            app/build/outputs/apk/**/*.apk 
