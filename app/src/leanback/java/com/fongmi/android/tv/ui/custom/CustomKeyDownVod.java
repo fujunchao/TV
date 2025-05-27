@@ -87,6 +87,11 @@ public class CustomKeyDownVod extends GestureDetector.SimpleOnGestureListener {
         return holdTime = holdTime - Constant.INTERVAL_SEEK;
     }
 
+    public void forwardTime85() {
+        holdTime = 85 * 1000;
+        listener.onSeekTo(holdTime);
+    }
+
     public void resetTime() {
         holdTime = 0;
     }

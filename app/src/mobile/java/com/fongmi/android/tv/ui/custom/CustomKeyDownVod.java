@@ -54,6 +54,11 @@ public class CustomKeyDownVod extends GestureDetector.SimpleOnGestureListener {
         this.lock = lock;
     }
 
+    public void forwardTime85() {
+        time = 85 * 1000;
+        listener.onSeekEnd(time);
+    }
+
     private boolean isEdge(MotionEvent e) {
         return ResUtil.isEdge(activity, e, ResUtil.dp2px(24));
     }

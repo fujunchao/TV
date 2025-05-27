@@ -1306,10 +1306,17 @@ public class VideoActivity extends BaseActivity implements CustomKeyDownVod.List
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        if (isFullscreen() && KeyUtil.isMenuKey(event)) onToggle();
-        if (isVisible(mBinding.control.getRoot())) setR1Callback();
-        if (isVisible(mBinding.control.getRoot())) mFocus2 = getCurrentFocus();
-        if (isFullscreen() && isGone(mBinding.control.getRoot()) && mKeyDown.hasEvent(event)) return mKeyDown.onKeyDown(event);
+        if (isVisible(mBinding.control.getRoot())) return mBinding.control.onKeyDown(event);
+        if (isVisible(mBinding.fast.getRoot()) && mFastAdapter.onKeyDown(event)) return true;
+        if (event.isLongPress() && KeyUtil.isMenuKey(event)) return openDialog();
+        if (event.getAction() == KeyEvent.ACTION_UP && KeyUtil.isDigitKey(event)) return checkDigit(event);
+        if (event.getAction() == KeyEvent.ACTION_UP && KeyUtil.isMenuKey(event)) return openKeep();
+        if (event.getKeyCode() == KeyEvent.KEYCODE_G && event.getAction() == KeyEvent.ACTION_UP) {
+            mKeyDown.forwardTime85();
+            showProgress();
+            return true;
+        }
+        if (mKeyDown.hasEvent(event)) return mKeyDown.onKeyDown(event);
         return super.dispatchKeyEvent(event);
     }
 
