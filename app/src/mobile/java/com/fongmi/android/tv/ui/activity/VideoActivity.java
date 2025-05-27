@@ -328,7 +328,7 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
         mBinding.control.right.back.setOnClickListener(view -> onFull());
         mBinding.control.right.lock.setOnClickListener(view -> onLock());
         mBinding.control.right.rotate.setOnClickListener(view -> onRotate());
-        mBinding.control.danmaku.setOnClickListener(view -> onDanmakuShow());
+        mBinding.control.danmaku.setOnClickListener(view -> onDanmaku());
         mBinding.control.action.text.setOnClickListener(this::onTrack);
         mBinding.control.action.audio.setOnClickListener(this::onTrack);
         mBinding.control.action.video.setOnClickListener(this::onTrack);
@@ -340,8 +340,8 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
         mBinding.control.action.decode.setOnClickListener(view -> onDecode());
         mBinding.control.action.ending.setOnClickListener(view -> onEnding());
         mBinding.control.action.opening.setOnClickListener(view -> onOpening());
-        mBinding.control.action.danmaku.setOnClickListener(view -> onDanmaku());
         mBinding.control.action.episodes.setOnClickListener(view -> onEpisodes());
+        mBinding.control.action.skip85.setOnClickListener(view -> onSkip85());
         mBinding.control.action.text.setOnLongClickListener(view -> onTextLong());
         mBinding.control.action.speed.setOnLongClickListener(view -> onSpeedLong());
         mBinding.control.action.reset.setOnLongClickListener(view -> onResetToggle());
@@ -836,6 +836,11 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
 
     private void onEpisodes() {
         mDialogs.add(EpisodeListDialog.create(this).episodes(mEpisodeAdapter.getItems()).show());
+    }
+
+    private void onSkip85() {
+        mKeyDown.forwardTime85();
+        showProgress();
     }
 
     private void onChoose() {

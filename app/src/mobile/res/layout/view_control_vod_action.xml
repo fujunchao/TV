@@ -92,6 +92,11 @@
             tools:visibility="visible" />
 
         <TextView
+            android:id="@+id/skip85"
+            style="@style/Control.Action"
+            android:text="@string/play_skip85" />
+
+        <TextView
             android:id="@+id/episodes"
             style="@style/Control.Action"
             android:text="@string/detail_episode" />

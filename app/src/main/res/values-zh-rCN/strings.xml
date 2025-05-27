@@ -41,6 +41,7 @@
     <string name="play_invert">反转</string>
     <string name="play_across">跨类</string>
     <string name="play_reverse">倒序</string>
+    <string name="play_skip85">跳过85秒</string>
     <string name="play_track_text">字幕</string>
     <string name="play_track_audio">音轨</string>
     <string name="play_track_video">视轨</string>

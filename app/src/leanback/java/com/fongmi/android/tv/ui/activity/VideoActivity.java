@@ -322,6 +322,7 @@ public class VideoActivity extends BaseActivity implements CustomKeyDownVod.List
         mBinding.control.change2.setOnClickListener(view -> onChange());
         mBinding.control.danmaku.setOnClickListener(view -> onDanmaku());
         mBinding.control.opening.setOnClickListener(view -> onOpening());
+        mBinding.control.skip85.setOnClickListener(view -> onSkip85());
         mBinding.control.speed.setOnLongClickListener(view -> onSpeedLong());
         mBinding.control.reset.setOnLongClickListener(view -> onResetToggle());
         mBinding.control.ending.setOnLongClickListener(view -> onEndingReset());
@@ -1306,11 +1307,6 @@ public class VideoActivity extends BaseActivity implements CustomKeyDownVod.List
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        if (isVisible(mBinding.control.getRoot())) return mBinding.control.onKeyDown(event);
-        if (isVisible(mBinding.fast.getRoot()) && mFastAdapter.onKeyDown(event)) return true;
-        if (event.isLongPress() && KeyUtil.isMenuKey(event)) return openDialog();
-        if (event.getAction() == KeyEvent.ACTION_UP && KeyUtil.isDigitKey(event)) return checkDigit(event);
-        if (event.getAction() == KeyEvent.ACTION_UP && KeyUtil.isMenuKey(event)) return openKeep();
         if (event.getKeyCode() == KeyEvent.KEYCODE_G && event.getAction() == KeyEvent.ACTION_UP) {
             mKeyDown.forwardTime85();
             showProgress();
@@ -1440,5 +1436,10 @@ public class VideoActivity extends BaseActivity implements CustomKeyDownVod.List
         mViewModel.result.removeObserver(mObserveDetail);
         mViewModel.player.removeObserver(mObservePlayer);
         mViewModel.search.removeObserver(mObserveSearch);
+    }
+
+    private void onSkip85() {
+        mKeyDown.forwardTime85();
+        showProgress();
     }
 }
