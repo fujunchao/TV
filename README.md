@@ -1,270 +1,70 @@
-# 影視
+# 影視 TV-MPV
 
-### 基於 CatVod 項目
+基于 [FongMi/TV](https://github.com/FongMi/TV) 的修改版，集成 mpv 播放器作为第三方播放内核。
 
-https://github.com/CatVodTVOfficial/CatVodTVJarLoader
+## 主要改动
 
-### 點播欄位
+### mpv 播放器集成
 
-| 欄位名稱       | 預設值  | 說明   | 其他         |
-|------------|------|------|------------|
-| searchable | 1    | 是否搜索 | 0：關閉；1：啟用  |
-| changeable | 1    | 是否換源 | 0：關閉；1：啟用  |
-| quickserch | 1    | 是否快搜 | 0：關閉；1：啟用  |
-| indexs     | 0    | 是否聚搜 | 0：關閉；1：啟用  |
-| hide       | 0    | 是否隱藏 | 0：顯示；1：隱藏  |
-| timeout    | 15   | 播放超時 | 單位：秒       |
-| header     | none | 請求標頭 | 格式：json    |
-| click      | none | 點擊js | javascript |
+在原有 ExoPlayer 基础上新增 mpv 播放器选项，用户可在设置中切换播放内核。
 
-### 直播欄位
+- 基于 [aniyomi-mpv-lib](https://github.com/aniyomiorg/aniyomi-mpv-lib) 集成 libmpv
+- 硬解码：`mediacodec-copy`，渲染：`gpu` + `android` context
+- 支持 mpv 音轨/字幕轨选择
+- 内置 `subfont.ttf` 字幕字体
 
-| 欄位名稱     | 預設值   | 說明    | 其他         |
-|----------|-------|-------|------------|
-| ua       | none  | 用戶代理  |            |
-| origin   | none  | 來源    |            |
-| referer  | none  | 參照地址  |            |
-| epg      | none  | 節目地址  |            |
-| logo     | none  | 台標地址  |            |
-| pass     | false | 是否免密碼 |            |
-| boot     | false | 是否自啟動 |            |
-| timeout  | 15    | 播放超時  | 單位：秒       |
-| header   | none  | 請求標頭  | 格式：json    |
-| click    | none  | 點擊js  | javascript |
-| catchup  | none  | 回看參數  |            |
-| timeZone | none  | 時區    |            |
+### 竖屏播放优化
 
-### 樣式
+解决 mpv 在竖屏模式下的多个显示问题：
 
-| 欄位名稱  | 值    | 說明  |
-|-------|------|-----|
-| type  | rect | 矩形  |
-|       | oval | 橢圓  |
-|       | list | 列表  |
-| ratio | 0.75 | 3：4 |
-|       | 1.33 | 4：3 |
+- **消除播放闪烁**：TextureView 初始 alpha=0，首帧渲染后才显示
+- **跳过尺寸动画**：mpv 模式下 `changeHeight()` 直接设最终高度，避免 300ms 过渡动画导致的画面闪烁
+- **进度恢复优化**：有播放历史的视频 seek 到上次位置时，不显示开头帧
+- **黑屏保护**：500ms 超时兜底，防止短距离 seek 时 mpv 不触发事件导致画面不显示
 
-直式
+### 全屏切换（手机端）
 
-```json
-{
-  "style": {
-    "type": "rect"
-  }
-}
+手机端新增全屏/退出全屏按钮。
+
+### 其他
+
+- QuickJS 引擎增加缓存和解析工具类
+- 更新依赖版本
+
+## 构建
+
+```bash
+# 构建变体：{mode}-{abi}
+# mode: leanback(TV) / mobile(手机)
+# abi: arm64_v8a / armeabi_v7a
+
+# TV版 ARM64
+./gradlew assembleLeanbackArm64_v8aRelease
+
+# 手机版 ARM64
+./gradlew assembleMobileArm64_v8aRelease
+
+# 全部变体
+./gradlew assembleLeanbackArm64_v8aRelease assembleLeanbackArmeabi_v7aRelease assembleMobileArm64_v8aRelease assembleMobileArmeabi_v7aRelease
 ```
 
-橫式
+输出 APK 位于 `app/build/outputs/apk/{mode}/{abi}/release/{mode}-{abi}.apk`
 
-```json
-{
-  "style": {
-    "type": "rect",
-    "ratio": 1.33
-  }
-}
-```
+### GitHub Actions 自动构建
 
-正方
+推送到 `TV-MPV` 分支会自动触发构建。创建 `v*` 格式的 tag 会自动生成 Release 并附带全部 4 个变体的 APK。
 
-```json
-{
-  "style": {
-    "type": "rect",
-    "ratio": 1
-  }
-}
-```
+需要在仓库 Settings → Secrets 中配置：
 
-正圓
+| Secret 名称 | 说明 |
+|---|---|
+| `KEYSTORE_BASE64` | 签名文件的 base64 编码 |
+| `KEYSTORE_PASSWORD` | 签名库密码 |
+| `KEY_ALIAS` | 密钥别名 |
+| `KEY_PASSWORD` | 密钥密码 |
 
-```json
-{
-  "style": {
-    "type": "oval"
-  }
-}
-```
+## 上游项目
 
-橢圓
-
-```json
-{
-  "style": {
-    "type": "oval",
-    "ratio": 1.1
-  }
-}
-```
-
-### API
-
-播放控制
-
-type 包含 stop、prev、next、loop、play、pause、replay
-```
-http://127.0.0.1:9978/action?do=control&type=next
-```
-
-刷新詳情
-
-```
-http://127.0.0.1:9978/action?do=refresh&type=detail
-```
-
-刷新播放
-
-```
-http://127.0.0.1:9978/action?do=refresh&type=player
-```
-
-刷新直播
-
-```
-http://127.0.0.1:9978/action?do=refresh&type=live
-```
-
-推送字幕
-
-```
-http://127.0.0.1:9978/action?do=refresh&type=subtitle&path=http://xxx
-```
-
-推送彈幕
-
-```
-http://127.0.0.1:9978/action?do=refresh&type=danmaku&path=http://xxx
-```
-
-新增緩存字串
-
-```
-http://127.0.0.1:9978/cache?do=set&key=xxx&value=xxx
-```
-
-取得緩存字串
-
-```
-http://127.0.0.1:9978/cache?do=get&key=xxx
-```
-
-刪除緩存字串
-
-```
-http://127.0.0.1:9978/cache?do=del&key=xxx
-```
-
-### Proxy
-
-支持 http, https, socks4, socks5
-
-```
-scheme://username:password@host:port
-```
-
-配置新增 proxy 可指定代理
-靠前的 host 匹配到則使用該代理
-
-```json
-{
-  "spider": "",
-  "proxy": [
-    {
-      "name": "自訂",
-      "hosts": [
-        "googlevideo.com",
-        "raw.githubusercontent.com"
-      ],
-      "urls": [
-        "http://127.0.0.1:7890"
-      ]
-    },
-    {
-      "name": "全局",
-      "hosts": [
-        ".*."
-      ],
-      "urls": [
-        "socks5://127.0.0.1:7891"
-      ]
-    }
-  ]
-}
-```
-
-### Hosts
-
-```json
-{
-  "spider": "",
-  "hosts": [
-    "cache.ott.*.itv.cmvideo.cn=base-v4-free-mghy.e.cdn.chinamobile.com"
-  ]
-}
-```
-
-### Headers
-
-```json
-{
-  "spider": "",
-  "headers": [
-    {
-      "host": "gslbserv.itv.cmvideo.cn",
-      "header": {
-        "User-Agent": "okhttp/3.12.13",
-        "Referer": "test"
-      }
-    }
-  ]
-}
-```
-
-### 爬蟲本地代理
-
-Java
-
-```
-proxy://
-```
-
-```
-Proxy.getUrl(boolean local)
-```
-
-Python
-
-```
-proxy://do=py
-```
-
-```
-getProxyUrl(boolean local)
-```
-
-JS
-
-```
-proxy://do=js
-```
-
-```
-getProxy(boolean local)
-```
-
-### 配置範例
-
-[本地/線上](other/sample/config.json)
-
-### 飛機群
-
-[討論群組](https://t.me/fongmi_official)  
-[發布頻道](https://t.me/fongmi_release)
-
-### 贊助
-
-![photo_2024-01-10_11-39-12](https://github.com/FongMi/TV/assets/3471963/fdc12771-386c-4d5d-9a4d-d0bec0276fa7)
-
-### Star
-
-[![Star History Chart](https://api.star-history.com/svg?repos=FongMi/TV&type=Date)](https://www.star-history.com/#FongMi/TV&Date)
+- [FongMi/TV](https://github.com/FongMi/TV) — 原始项目
+- [CatVodTVOfficial/CatVodTVJarLoader](https://github.com/CatVodTVOfficial/CatVodTVJarLoader) — CatVod 爬虫框架
+- [aniyomiorg/aniyomi-mpv-lib](https://github.com/aniyomiorg/aniyomi-mpv-lib) — mpv Android 库
