@@ -21,6 +21,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: 配置 Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
       - name: 配置 Gradle 缓存
         uses: actions/cache@v4
         with:
@@ -40,37 +45,13 @@ jobs:
       - name: 赋予 Gradle 执行权限
         run: chmod +x gradlew
 
-      - name: 构建 mobile-arm64_v8a
+      - name: 构建全部变体
         env:
           KEYSTORE_FILE: fongmi.jks
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: ./gradlew assembleMobileArm64_v8aRelease
-
-      - name: 构建 mobile-armeabi_v7a
-        env:
-          KEYSTORE_FILE: fongmi.jks
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: ./gradlew assembleMobileArmeabi_v7aRelease
-
-      - name: 构建 leanback-arm64_v8a
-        env:
-          KEYSTORE_FILE: fongmi.jks
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: ./gradlew assembleLeanbackArm64_v8aRelease
-
-      - name: 构建 leanback-armeabi_v7a
-        env:
-          KEYSTORE_FILE: fongmi.jks
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: ./gradlew assembleLeanbackArmeabi_v7aRelease
+        run: ./gradlew assembleMobileArm64_v8aRelease assembleMobileArmeabi_v7aRelease assembleLeanbackArm64_v8aRelease assembleLeanbackArmeabi_v7aRelease
 
       - name: 整理 APK 文件
         run: |
