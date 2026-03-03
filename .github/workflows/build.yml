@@ -60,10 +60,10 @@ jobs:
       - name: 整理 APK 文件
         run: |
           mkdir -p release/apk
-          cp app/build/outputs/apk/mobile/arm64_v8a/release/mobile-arm64_v8a.apk release/apk/
-          cp app/build/outputs/apk/mobile/armeabi_v7a/release/mobile-armeabi_v7a.apk release/apk/
-          cp app/build/outputs/apk/leanback/arm64_v8a/release/leanback-arm64_v8a.apk release/apk/
-          cp app/build/outputs/apk/leanback/armeabi_v7a/release/leanback-armeabi_v7a.apk release/apk/
+          cp app/build/outputs/apk/mobileArm64_v8a/release/mobile-arm64_v8a.apk release/apk/
+          cp app/build/outputs/apk/mobileArmeabi_v7a/release/mobile-armeabi_v7a.apk release/apk/
+          cp app/build/outputs/apk/leanbackArm64_v8a/release/leanback-arm64_v8a.apk release/apk/
+          cp app/build/outputs/apk/leanbackArmeabi_v7a/release/leanback-armeabi_v7a.apk release/apk/
 
       - name: 上传 APK 产物
         uses: actions/upload-artifact@v4
