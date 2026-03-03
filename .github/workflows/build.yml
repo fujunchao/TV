@@ -44,7 +44,7 @@ jobs:
 
       - name: 下载 mpv-release.aar
         run: |
-          curl -L -o app/libs/mpv-release.aar "https://github.com/fujunchao/TV/releases/download/libs/mpv-release.aar"
+          curl -L -o app/libs/mpv-release.aar "https://github.com/fujunchao/aniyomi-mpv-lib/releases/download/1.18.n-full/mpv-release.aar"
 
       - name: 赋予 Gradle 执行权限
         run: chmod +x gradlew
