@@ -42,6 +42,10 @@ jobs:
         run: |
           printf '%s' "$KEYSTORE_BASE64" | tr -d '\n\r ' | base64 -d > app/fongmi.jks
 
+      - name: 下载 mpv-release.aar
+        run: |
+          curl -L -o app/libs/mpv-release.aar "https://github.com/fujunchao/TV/releases/download/libs/mpv-release.aar"
+
       - name: 赋予 Gradle 执行权限
         run: chmod +x gradlew
 
