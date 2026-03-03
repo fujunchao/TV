@@ -196,9 +196,11 @@ public class Config {
         AppDatabase.get().getConfigDao().delete(url, type);
     }
 
+    private static final String DEFAULT_VOD_URL = "";
+
     public static Config vod() {
         Config item = AppDatabase.get().getConfigDao().findOne(0);
-        return item == null ? create(0) : item;
+        return item == null ? create(0, DEFAULT_VOD_URL) : item;
     }
 
     public static Config live() {

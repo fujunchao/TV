@@ -107,7 +107,7 @@ public class ControlDialog extends BaseDialog implements ParseAdapter.OnClickLis
         binding.text.setOnClickListener(v -> dismiss(parent.control.action.text));
         binding.audio.setOnClickListener(v -> dismiss(parent.control.action.audio));
         binding.video.setOnClickListener(v -> dismiss(parent.control.action.video));
-        binding.player.setOnClickListener(v -> dismiss(parent.control.action.player));
+        binding.player.setOnClickListener(v -> click(binding.player, parent.control.action.player));
         binding.danmaku.setOnClickListener(v -> dismiss(parent.control.action.danmaku));
         binding.loop.setOnClickListener(v -> active(binding.loop, parent.control.action.loop));
         binding.decode.setOnClickListener(v -> click(binding.decode, parent.control.action.decode));

@@ -82,3 +82,7 @@
 
 # Zxing
 -keep class com.google.zxing.** { *; }
+
+# MPV
+# mpv native library JNI classes
+-keep class is.xyz.mpv.** { *; }

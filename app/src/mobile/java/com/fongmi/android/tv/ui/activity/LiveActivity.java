@@ -50,6 +50,7 @@ import com.fongmi.android.tv.model.LiveViewModel;
 import com.fongmi.android.tv.player.Players;
 import com.fongmi.android.tv.player.Source;
 import com.fongmi.android.tv.player.exo.ExoUtil;
+import com.fongmi.android.tv.player.mpv.MpvUtil;
 import com.fongmi.android.tv.service.PlaybackService;
 import com.fongmi.android.tv.ui.adapter.ChannelAdapter;
 import com.fongmi.android.tv.ui.adapter.EpgDataAdapter;
@@ -164,6 +165,7 @@ public class LiveActivity extends BaseActivity implements CustomKeyDown.Listener
     @SuppressLint("ClickableViewAccessibility")
     protected void initEvent() {
         mBinding.control.seek.setPlayer(mPlayers);
+        if (mBinding.control.seek.getFullscreen() != null) mBinding.control.seek.getFullscreen().setVisibility(View.GONE);
         mBinding.control.back.setOnClickListener(view -> onBack());
         mBinding.control.cast.setOnClickListener(view -> onCast());
         mBinding.control.info.setOnClickListener(view -> onInfo());
@@ -183,7 +185,8 @@ public class LiveActivity extends BaseActivity implements CustomKeyDown.Listener
         mBinding.control.action.invert.setOnClickListener(view -> onInvert());
         mBinding.control.action.across.setOnClickListener(view -> onAcross());
         mBinding.control.action.change.setOnClickListener(view -> onChange());
-        mBinding.control.action.player.setOnClickListener(view -> onChoose());
+        mBinding.control.action.player.setOnClickListener(view -> onPlayer());
+        mBinding.control.action.player.setOnLongClickListener(view -> onChoose());
         mBinding.control.action.decode.setOnClickListener(view -> onDecode());
         mBinding.control.action.text.setOnLongClickListener(view -> onTextLong());
         mBinding.control.action.speed.setOnLongClickListener(view -> onSpeedLong());
@@ -201,16 +204,18 @@ public class LiveActivity extends BaseActivity implements CustomKeyDown.Listener
     }
 
     private void setVideoView() {
+        mPlayers.setMpvSurface(mBinding.mpv);
         mPlayers.init(mBinding.exo);
         PlaybackService.start(mPlayers);
         setScale(Setting.getLiveScale());
-        ExoUtil.setSubtitleView(mBinding.exo);
+        if (!mPlayers.isMpv()) ExoUtil.setSubtitleView(mBinding.exo);
         mPlayers.setTag(tag = UUID.randomUUID().toString());
         mBinding.control.action.invert.setActivated(Setting.isInvert());
         mBinding.control.action.across.setActivated(Setting.isAcross());
         mBinding.control.action.change.setActivated(Setting.isChange());
         mBinding.control.action.speed.setText(mPlayers.getSpeedText());
         mBinding.control.action.decode.setText(mPlayers.getDecodeText());
+        mBinding.control.action.player.setText(mPlayers.getPlayerText());
         mBinding.video.addOnLayoutChangeListener((view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> mPiP.update(this, view));
     }
 
@@ -220,7 +225,8 @@ public class LiveActivity extends BaseActivity implements CustomKeyDown.Listener
 
     private void setScale(int scale) {
         Setting.putLiveScale(scale);
-        mBinding.exo.setResizeMode(scale);
+        if (mPlayers.isMpv()) MpvUtil.setScale(scale);
+        else mBinding.exo.setResizeMode(scale);
         mBinding.control.action.scale.setText(ResUtil.getStringArray(R.array.select_scale)[scale]);
     }
 
@@ -420,9 +426,18 @@ public class LiveActivity extends BaseActivity implements CustomKeyDown.Listener
         setDecode();
     }
 
-    private void onChoose() {
+    private void onPlayer() {
+        mPlayers.togglePlayer();
+        mBinding.control.action.player.setText(mPlayers.getPlayerText());
+        mBinding.control.action.decode.setText(mPlayers.getDecodeText());
+        if (!mPlayers.isMpv()) ExoUtil.setSubtitleView(mBinding.exo);
+        setScale(Setting.getLiveScale());
+    }
+
+    private boolean onChoose() {
         mPlayers.choose(this, mBinding.control.title.getText());
         setRedirect(true);
+        return true;
     }
 
     private boolean onTextLong() {
@@ -714,6 +729,7 @@ public class LiveActivity extends BaseActivity implements CustomKeyDown.Listener
 
     @Override
     public void onSubtitleClick() {
+        if (mPlayers.isMpv()) return;
         App.post(this::hideControl, 200);
         App.post(() -> SubtitleDialog.create().view(mBinding.exo.getSubtitleView()).full(true).show(this), 200);
     }

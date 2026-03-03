@@ -55,10 +55,12 @@ public class CrashActivity extends BaseActivity {
     }
 
     private void showError() {
+        String error = CustomActivityOnCrash.getAllErrorDetailsFromIntent(this, getIntent());
         new AlertDialog.Builder(this)
                 .setTitle(R.string.crash_details_title)
-                .setMessage(CustomActivityOnCrash.getAllErrorDetailsFromIntent(this, getIntent()))
+                .setMessage(error)
                 .setPositiveButton(R.string.crash_details_close, null)
+                .setNeutralButton(R.string.crash_copy, (d, w) -> com.fongmi.android.tv.utils.Util.copy(error))
                 .show();
     }
 }

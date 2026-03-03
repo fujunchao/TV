@@ -13,4 +13,5 @@ project.ext {
     glideVersion = '5.0.5'
     media3Version = '1.9.2'
     okhttpVersion = '5.3.2'
+    jsoupVersion = '1.18.3'
 }

@@ -30,6 +30,7 @@
     <string name="play_op">片頭</string>
     <string name="play_ed">片尾</string>
     <string name="play_exo">EXO</string>
+    <string name="play_mpv">MPV</string>
     <string name="play_next">下集</string>
     <string name="play_prev">上集</string>
     <string name="play_loop">循環</string>
@@ -108,6 +109,7 @@
     <string name="player_buffer">緩衝時間</string>
     <string name="player_speed">長按倍速</string>
     <string name="player_ua">User-Agent</string>
+    <string name="player_type">播放核心</string>
 
     <!-- Search -->
     <string name="search_keyword">關鍵字…</string>
@@ -148,6 +150,7 @@
     <string name="crash_details">錯誤訊息</string>
     <string name="crash_details_title">錯誤訊息</string>
     <string name="crash_details_close">關閉</string>
+    <string name="crash_copy">複製</string>
 
     <!-- Hint -->
     <string name="copied">已複製</string>
@@ -192,6 +195,11 @@
         <item>選擇音軌</item>
         <item>選擇視軌</item>
         <item>選擇字幕</item>
+    </string-array>
+
+    <string-array name="select_player">
+        <item>ExoPlayer</item>
+        <item>MPV</item>
     </string-array>
 
 </resources>

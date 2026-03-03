@@ -33,6 +33,7 @@ public class SettingPlayerFragment extends BaseFragment implements UaCallback, B
     private String[] caption;
     private String[] render;
     private String[] scale;
+    private String[] playerType;
 
     public static SettingPlayerFragment newInstance() {
         return new SettingPlayerFragment();
@@ -64,6 +65,7 @@ public class SettingPlayerFragment extends BaseFragment implements UaCallback, B
         mBinding.renderText.setText((render = ResUtil.getStringArray(R.array.select_render))[Setting.getRender()]);
         mBinding.captionText.setText((caption = ResUtil.getStringArray(R.array.select_caption))[Setting.isCaption() ? 1 : 0]);
         mBinding.backgroundText.setText((background = ResUtil.getStringArray(R.array.select_background))[Setting.getBackground()]);
+        mBinding.playerTypeText.setText((playerType = ResUtil.getStringArray(R.array.select_player))[Setting.getPlayer()]);
     }
 
     @Override
@@ -73,6 +75,7 @@ public class SettingPlayerFragment extends BaseFragment implements UaCallback, B
         mBinding.scale.setOnClickListener(this::onScale);
         mBinding.speed.setOnClickListener(this::onSpeed);
         mBinding.buffer.setOnClickListener(this::onBuffer);
+        mBinding.playerType.setOnClickListener(this::onPlayerType);
         mBinding.render.setOnClickListener(this::setRender);
         mBinding.tunnel.setOnClickListener(this::setTunnel);
         mBinding.caption.setOnClickListener(this::setCaption);
@@ -176,6 +179,14 @@ public class SettingPlayerFragment extends BaseFragment implements UaCallback, B
     private void setDanmakuLoad(View view) {
         Setting.putDanmakuLoad(!Setting.isDanmakuLoad());
         mBinding.danmakuLoadText.setText(getSwitch(Setting.isDanmakuLoad()));
+    }
+
+    private void onPlayerType(View view) {
+        new MaterialAlertDialogBuilder(requireActivity()).setTitle(R.string.player_type).setNegativeButton(R.string.dialog_negative, null).setSingleChoiceItems(playerType, Setting.getPlayer(), (dialog, which) -> {
+            mBinding.playerTypeText.setText(playerType[which]);
+            Setting.putPlayer(which);
+            dialog.dismiss();
+        }).show();
     }
 
     @Override

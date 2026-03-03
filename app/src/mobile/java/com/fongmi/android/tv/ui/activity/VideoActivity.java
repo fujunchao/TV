@@ -66,6 +66,7 @@ import com.fongmi.android.tv.impl.CustomTarget;
 import com.fongmi.android.tv.model.SiteViewModel;
 import com.fongmi.android.tv.player.Players;
 import com.fongmi.android.tv.player.exo.ExoUtil;
+import com.fongmi.android.tv.player.mpv.MpvUtil;
 import com.fongmi.android.tv.service.PlaybackService;
 import com.fongmi.android.tv.ui.adapter.EpisodeAdapter;
 import com.fongmi.android.tv.ui.adapter.FlagAdapter;
@@ -304,6 +305,7 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
     @SuppressLint("ClickableViewAccessibility")
     protected void initEvent() {
         mBinding.control.seek.setPlayer(mPlayers);
+        if (mBinding.control.seek.getFullscreen() != null) mBinding.control.seek.getFullscreen().setOnClickListener(view -> onFullscreen());
         mBinding.name.setOnClickListener(view -> onName());
         mBinding.more.setOnClickListener(view -> onMore());
         mBinding.actor.setOnClickListener(view -> onActor());
@@ -331,7 +333,8 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
         mBinding.control.action.scale.setOnClickListener(view -> onScale());
         mBinding.control.action.speed.setOnClickListener(view -> onSpeed());
         mBinding.control.action.reset.setOnClickListener(view -> onReset());
-        mBinding.control.action.player.setOnClickListener(view -> onChoose());
+        mBinding.control.action.player.setOnClickListener(view -> onPlayer());
+        mBinding.control.action.player.setOnLongClickListener(view -> onChoose());
         mBinding.control.action.decode.setOnClickListener(view -> onDecode());
         mBinding.control.action.ending.setOnClickListener(view -> onEnding());
         mBinding.control.action.opening.setOnClickListener(view -> onOpening());
@@ -376,15 +379,17 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
     }
 
     private void setVideoView() {
+        mPlayers.setMpvSurface(mBinding.mpv);
         mPlayers.init(mBinding.exo);
         PlaybackService.start(mPlayers);
-        ExoUtil.setSubtitleView(mBinding.exo);
+        if (!mPlayers.isMpv()) ExoUtil.setSubtitleView(mBinding.exo);
         mPlayers.setDanmakuView(mBinding.danmaku);
         mPlayers.setTag(tag = UUID.randomUUID().toString());
         if (isPort() && ResUtil.isLand(this)) enterFullscreen();
         mBinding.control.action.decode.setText(mPlayers.getDecodeText());
         mBinding.control.action.danmaku.setVisibility(Setting.isDanmakuLoad() ? View.VISIBLE : View.GONE);
         mBinding.control.action.reset.setText(ResUtil.getStringArray(R.array.select_reset)[Setting.getReset()]);
+        mBinding.control.action.player.setText(mPlayers.getPlayerText());
         mBinding.video.addOnLayoutChangeListener((view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> mPiP.update(this, view));
     }
 
@@ -412,7 +417,8 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
 
     private void setScale(int scale) {
         mHistory.setScale(scale);
-        mBinding.exo.setResizeMode(scale);
+        if (mPlayers.isMpv()) MpvUtil.setScale(scale);
+        else mBinding.exo.setResizeMode(scale);
         mBinding.control.action.scale.setText(ResUtil.getStringArray(R.array.select_scale)[scale]);
     }
 
@@ -863,9 +869,18 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
         EpisodeListDialog.create(this).episodes(mEpisodeAdapter.getItems()).show();
     }
 
-    private void onChoose() {
+    private void onPlayer() {
+        mPlayers.togglePlayer();
+        mBinding.control.action.player.setText(mPlayers.getPlayerText());
+        mBinding.control.action.decode.setText(mPlayers.getDecodeText());
+        if (!mPlayers.isMpv()) ExoUtil.setSubtitleView(mBinding.exo);
+        setScale(getScale());
+    }
+
+    private boolean onChoose() {
         mPlayers.choose(this, mBinding.control.title.getText());
         setRedirect(true);
+        return true;
     }
 
     private boolean onTextLong() {
@@ -902,6 +917,7 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
         mKeyDown.resetScale();
         App.post(mR3, 2000);
         hideControl();
+        setFullscreenIcon();
     }
 
     private void exitFullscreen() {
@@ -917,6 +933,18 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
         App.post(mR3, 2000);
         setRotate(false);
         hideControl();
+        setFullscreenIcon();
+    }
+
+    private void onFullscreen() {
+        if (isFullscreen()) exitFullscreen();
+        else enterFullscreen();
+    }
+
+    private void setFullscreenIcon() {
+        if (mBinding.control.seek.getFullscreen() != null) {
+            mBinding.control.seek.getFullscreen().setImageResource(isFullscreen() ? R.drawable.ic_control_fullscreen_exit : R.drawable.ic_control_fullscreen);
+        }
     }
 
     private void setTransition() {
@@ -1148,6 +1176,7 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
 
     @Override
     public void onSubtitleClick() {
+        if (mPlayers.isMpv()) return;
         SubtitleDialog.create().view(mBinding.exo.getSubtitleView()).full(isFullscreen()).show(this);
         hideControl();
     }
@@ -1261,10 +1290,17 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
         int calculated = (int) (viewWidth * ((float) videoHeight / videoWidth));
         int finalHeight = Math.max(minHeight, Math.min(maxHeight, calculated));
         if (finalHeight == mBinding.video.getHeight()) return;
-        if (mAnimator.isRunning()) mAnimator.cancel();
-        mAnimator.setIntValues(mBinding.video.getHeight(), finalHeight);
-        mAnimator.setDuration(300);
-        mAnimator.start();
+        if (mPlayers.isMpv()) {
+            // mpv 模式：直接设置最终高度，不使用动画
+            // 动画期间 TextureView 大量 onSurfaceTextureSizeChanged 回调会导致 mpv VO 崩溃（Missing surface pointer）
+            mFrameParams.height = finalHeight;
+            mBinding.video.setLayoutParams(mFrameParams);
+        } else {
+            if (mAnimator.isRunning()) mAnimator.cancel();
+            mAnimator.setIntValues(mBinding.video.getHeight(), finalHeight);
+            mAnimator.setDuration(300);
+            mAnimator.start();
+        }
     }
 
     private void checkEnded(boolean notify) {
@@ -1661,8 +1697,9 @@ public class VideoActivity extends BaseActivity implements Clock.Callback, Custo
     @Override
     protected void onStop() {
         super.onStop();
-        if (Setting.isBackgroundOff()) mClock.stop();
-        if (Setting.isBackgroundOff()) onPaused();
+        boolean shouldPause = Setting.isBackgroundOff();
+        if (shouldPause) mClock.stop();
+        if (shouldPause) onPaused();
         if (!isAudioOnly()) setStop(true);
     }
 

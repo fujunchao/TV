@@ -56,6 +56,7 @@ import com.fongmi.android.tv.impl.CustomTarget;
 import com.fongmi.android.tv.model.SiteViewModel;
 import com.fongmi.android.tv.player.Players;
 import com.fongmi.android.tv.player.exo.ExoUtil;
+import com.fongmi.android.tv.player.mpv.MpvUtil;
 import com.fongmi.android.tv.service.PlaybackService;
 import com.fongmi.android.tv.ui.adapter.QualityAdapter;
 import com.fongmi.android.tv.ui.base.BaseActivity;
@@ -309,7 +310,8 @@ public class VideoActivity extends BaseActivity implements CustomKeyDownVod.List
         mBinding.control.scale.setOnClickListener(view -> onScale());
         mBinding.control.speed.setOnClickListener(view -> onSpeed());
         mBinding.control.reset.setOnClickListener(view -> onReset());
-        mBinding.control.player.setOnClickListener(view -> onChoose());
+        mBinding.control.player.setOnClickListener(view -> onPlayer());
+        mBinding.control.player.setOnLongClickListener(view -> onChoose());
         mBinding.control.decode.setOnClickListener(view -> onDecode());
         mBinding.control.ending.setOnClickListener(view -> onEnding());
         mBinding.control.change2.setOnClickListener(view -> onChange());
@@ -366,14 +368,16 @@ public class VideoActivity extends BaseActivity implements CustomKeyDownVod.List
     }
 
     private void setVideoView() {
+        mPlayers.setMpvSurface(mBinding.mpv);
         mPlayers.init(mBinding.exo);
         PlaybackService.start(mPlayers);
-        ExoUtil.setSubtitleView(mBinding.exo);
+        if (!mPlayers.isMpv()) ExoUtil.setSubtitleView(mBinding.exo);
         mPlayers.setDanmakuView(mBinding.danmaku);
         mPlayers.setTag(tag = UUID.randomUUID().toString());
         mBinding.control.decode.setText(mPlayers.getDecodeText());
         mBinding.control.danmaku.setVisibility(Setting.isDanmakuLoad() ? View.VISIBLE : View.GONE);
         mBinding.control.reset.setText(ResUtil.getStringArray(R.array.select_reset)[Setting.getReset()]);
+        mBinding.control.player.setText(mPlayers.getPlayerText());
     }
 
     private void setDecode() {
@@ -381,7 +385,8 @@ public class VideoActivity extends BaseActivity implements CustomKeyDownVod.List
     }
 
     private void setScale(int scale) {
-        mBinding.exo.setResizeMode(scale);
+        if (mPlayers.isMpv()) MpvUtil.setScale(scale);
+        else mBinding.exo.setResizeMode(scale);
         mBinding.control.scale.setText(ResUtil.getStringArray(R.array.select_scale)[scale]);
     }
 
@@ -830,9 +835,18 @@ public class VideoActivity extends BaseActivity implements CustomKeyDownVod.List
         mBinding.control.ending.setText(ending <= 0 ? getString(R.string.play_ed) : mPlayers.stringToTime(mHistory.getEnding()));
     }
 
-    private void onChoose() {
+    private void onPlayer() {
+        mPlayers.togglePlayer();
+        mBinding.control.player.setText(mPlayers.getPlayerText());
+        mBinding.control.decode.setText(mPlayers.getDecodeText());
+        if (!mPlayers.isMpv()) ExoUtil.setSubtitleView(mBinding.exo);
+        setScale(getScale());
+    }
+
+    private boolean onChoose() {
         mPlayers.choose(this, mBinding.widget.title.getText());
         setRedirect(true);
+        return true;
     }
 
     private void onDecode() {
@@ -1048,6 +1062,7 @@ public class VideoActivity extends BaseActivity implements CustomKeyDownVod.List
 
     @Override
     public void onSubtitleClick() {
+        if (mPlayers.isMpv()) return;
         SubtitleDialog.create().view(mBinding.exo.getSubtitleView()).full(isFullscreen()).show(this);
         App.post(this::hideControl, 100);
     }

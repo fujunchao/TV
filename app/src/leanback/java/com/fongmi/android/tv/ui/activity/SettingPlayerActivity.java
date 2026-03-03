@@ -28,6 +28,7 @@ public class SettingPlayerActivity extends BaseActivity implements UaCallback, B
     private String[] caption;
     private String[] render;
     private String[] scale;
+    private String[] playerType;
 
     public static void start(Activity activity) {
         activity.startActivity(new Intent(activity, SettingPlayerActivity.class));
@@ -46,7 +47,8 @@ public class SettingPlayerActivity extends BaseActivity implements UaCallback, B
     protected void initView() {
         setVisible();
         format = new DecimalFormat("0.#");
-        mBinding.render.requestFocus();
+        mBinding.playerType.requestFocus();
+        mBinding.playerTypeText.setText((playerType = ResUtil.getStringArray(R.array.select_player))[Setting.getPlayer()]);
         mBinding.uaText.setText(Setting.getUa());
         mBinding.aacText.setText(getSwitch(Setting.isPreferAAC()));
         mBinding.tunnelText.setText(getSwitch(Setting.isTunnel()));
@@ -69,6 +71,7 @@ public class SettingPlayerActivity extends BaseActivity implements UaCallback, B
         mBinding.scale.setOnClickListener(this::setScale);
         mBinding.speed.setOnClickListener(this::onSpeed);
         mBinding.buffer.setOnClickListener(this::onBuffer);
+        mBinding.playerType.setOnClickListener(this::setPlayerType);
         mBinding.render.setOnClickListener(this::setRender);
         mBinding.tunnel.setOnClickListener(this::setTunnel);
         mBinding.caption.setOnClickListener(this::setCaption);
@@ -172,5 +175,11 @@ public class SettingPlayerActivity extends BaseActivity implements UaCallback, B
     private void onBackground(View view) {
         Setting.putBackground(Setting.isBackgroundOn() ? 0 : 1);
         mBinding.backgroundText.setText(getSwitch(Setting.isBackgroundOn()));
+    }
+
+    private void setPlayerType(View view) {
+        int index = (Setting.getPlayer() + 1) % playerType.length;
+        mBinding.playerTypeText.setText(playerType[index]);
+        Setting.putPlayer(index);
     }
 }

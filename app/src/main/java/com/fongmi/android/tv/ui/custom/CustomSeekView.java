@@ -5,6 +5,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,6 +27,7 @@ public class CustomSeekView extends FrameLayout implements TimeBar.OnScrubListen
     private final TextView durationView;
     private final DefaultTimeBar timeBar;
     private final Runnable refresh;
+    private final ImageView fullscreenView;
 
     private long currentDuration;
     private long currentPosition;
@@ -46,6 +48,7 @@ public class CustomSeekView extends FrameLayout implements TimeBar.OnScrubListen
         LayoutInflater.from(context).inflate(R.layout.view_control_seek, this);
         positionView = findViewById(R.id.position);
         durationView = findViewById(R.id.duration);
+        fullscreenView = findViewById(R.id.fullscreen);
         timeBar = findViewById(R.id.timeBar);
         timeBar.addListener(this);
         refresh = this::refresh;
@@ -55,6 +58,10 @@ public class CustomSeekView extends FrameLayout implements TimeBar.OnScrubListen
         removeCallbacks(refresh);
         this.player = player;
         post(refresh);
+    }
+
+    public ImageView getFullscreen() {
+        return fullscreenView;
     }
 
     private void refresh() {

@@ -6,12 +6,15 @@ import androidx.annotation.NonNull;
 import com.fongmi.quickjs.bean.Req;
 import com.fongmi.quickjs.utils.Connect;
 import com.fongmi.quickjs.utils.Crypto;
+import com.fongmi.quickjs.utils.Parser;
+import com.fongmi.quickjs.utils.JSUtil;
 import com.github.catvod.Proxy;
 import com.github.catvod.utils.Trans;
 import com.github.catvod.utils.UriUtil;
 import com.orhanobut.logger.Logger;
 import com.whl.quickjs.wrapper.JSFunction;
 import com.whl.quickjs.wrapper.JSMethod;
+import com.whl.quickjs.wrapper.JSArray;
 import com.whl.quickjs.wrapper.JSObject;
 import com.whl.quickjs.wrapper.QuickJSContext;
 
@@ -30,6 +33,7 @@ public class Global {
 
     private final ExecutorService executor;
     private final QuickJSContext ctx;
+    private final Parser parser;
     private final Timer timer;
 
     public static Global create(QuickJSContext ctx, ExecutorService executor) {
@@ -37,6 +41,7 @@ public class Global {
     }
 
     private Global(QuickJSContext ctx, ExecutorService executor) {
+        this.parser = new Parser();
         this.executor = executor;
         this.timer = new Timer();
         this.ctx = ctx;
@@ -148,6 +153,30 @@ public class Global {
         String result = Crypto.rsa(mode, pub, encrypt, input, inBase64, key, outBase64);
         Logger.t("rsaX").d("mode:%s\npub:%s\nencrypt:%s\ninBase64:%s\noutBase64:%s\nkey:\n%s\ninput:\n%s\nresult:\n%s", mode, pub, encrypt, inBase64, outBase64, key, input, result);
         return result;
+    }
+
+    @Keep
+    @JSMethod
+    public String pd(String html, String rule, String urlKey) {
+        return parser.parseDomForUrl(html, rule, urlKey);
+    }
+
+    @Keep
+    @JSMethod
+    public String pdfh(String html, String rule) {
+        return parser.parseDomForUrl(html, rule, "");
+    }
+
+    @Keep
+    @JSMethod
+    public JSArray pdfa(String html, String rule) {
+        return JSUtil.toArray(ctx, parser.parseDomForArray(html, rule));
+    }
+
+    @Keep
+    @JSMethod
+    public JSArray pdfl(String html, String rule, String texts, String urls, String urlKey) {
+        return JSUtil.toArray(ctx, parser.parseDomForList(html, rule, texts, urls, urlKey));
     }
 
     private Callback getCallback(JSFunction complete, Req req) {

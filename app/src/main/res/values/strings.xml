@@ -30,6 +30,7 @@
     <string name="play_op">OP</string>
     <string name="play_ed">ED</string>
     <string name="play_exo">EXO</string>
+    <string name="play_mpv">MPV</string>
     <string name="play_next">Next</string>
     <string name="play_prev">Prev</string>
     <string name="play_loop">Loop</string>
@@ -109,6 +110,7 @@
     <string name="player_buffer">Buffer time</string>
     <string name="player_speed">Press speed</string>
     <string name="player_ua">User-Agent</string>
+    <string name="player_type">Player engine</string>
 
     <!-- Search -->
     <string name="search_keyword">Keywords…</string>
@@ -149,6 +151,7 @@
     <string name="crash_details">Error details</string>
     <string name="crash_details_title">Error details</string>
     <string name="crash_details_close">Close</string>
+    <string name="crash_copy">Copy</string>
 
     <!-- Hint -->
     <string name="copied">Copied</string>
@@ -198,6 +201,11 @@
         <item>Select audio track</item>
         <item>Select video track</item>
         <item>Select subtitle track</item>
+    </string-array>
+
+    <string-array name="select_player">
+        <item>ExoPlayer</item>
+        <item>MPV</item>
     </string-array>
 
 </resources>

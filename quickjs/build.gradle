@@ -25,6 +25,7 @@ android {
 
 dependencies {
     implementation project(':catvod')
+    implementation 'org.jsoup:jsoup:' + jsoupVersion
     implementation 'wang.harlon.quickjs:wrapper-java:3.2.3'
     implementation 'wang.harlon.quickjs:wrapper-android:3.2.3'
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs_nio:2.1.5'

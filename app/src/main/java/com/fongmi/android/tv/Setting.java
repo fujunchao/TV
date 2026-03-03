@@ -274,6 +274,18 @@ public class Setting {
         Prefers.put("subtitle_position", value);
     }
 
+    public static int getPlayer() {
+        return Prefers.getInt("player");
+    }
+
+    public static void putPlayer(int player) {
+        Prefers.put("player", player);
+    }
+
+    public static boolean isMpv() {
+        return getPlayer() == 1;
+    }
+
     public static boolean isBackgroundOff() {
         return getBackground() == 0;
     }

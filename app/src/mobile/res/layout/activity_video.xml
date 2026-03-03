@@ -21,6 +21,12 @@
         android:clickable="true"
         android:focusable="true">
 
+        <TextureView
+            android:id="@+id/mpv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
         <androidx.media3.ui.PlayerView
             android:id="@+id/exo"
             style="@style/Player.Vod"
